@@ -45,15 +45,15 @@ def append_df(df, lines, colnames, y, m):
     return df
 
 def main():
-    y = 2017
+    y = 1929
     col_names = [
         "yyyy/mm/dd",
-        "g", 
+        "g",
         "f",
         "R"
     ]
     sunspots_df = pd.DataFrame()
-    for i in range(7):
+    for i in range(2024-1929):
         url = "https://solarwww.mtk.nao.ac.jp/mitaka_solar/sunspots/number/mtkdaily{}.txt".format(y+i)
         res = req.urlopen(url)
         body = str(BeautifulSoup(res, "html.parser"))
@@ -64,9 +64,9 @@ def main():
             lines = block.splitlines()[7:-3]
             parsed_lines = parse_lines(lines)
             sunspots_df = append_df(sunspots_df, parsed_lines, col_names, y+i, m+1)
-    
+
     print(sunspots_df)
-    sunspots_df.to_csv("sunspots_2017_2023.csv")
+    sunspots_df.to_csv("sunspots_1929_2023.csv")
 
 if __name__ == "__main__":
     main()
