@@ -1,11 +1,10 @@
 from bs4 import BeautifulSoup
 import urllib.request as req
-import urllib
-import os
 import time
 from urllib.parse import urljoin
 import re
 import pandas as pd
+import numpy as np
 
 def convert_token_type(tokens):
     # str -> int
@@ -34,10 +33,12 @@ def append_df(df, lines, colnames, y, m):
     for line in lines:
         try:
             index = []
-            index.append("{}/{}/{}".format(str(y), str(m).zfill(2), str(int(line[0])).zfill(2)))
-            index.append(line[-3])
-            index.append(line[-2])
-            index.append(line[-1])
+            index.append("{}-{}-{}".format(str(y), str(m).zfill(2), str(int(line[0])).zfill(2)))
+            if len(line) != 1:
+                index.append(line[-3])
+                index.append(line[-2])
+                index.append(line[-1])
+                
             df_temp = pd.DataFrame([index], columns=colnames)
             df = pd.concat([df, df_temp], axis=0)
         except:
@@ -45,15 +46,15 @@ def append_df(df, lines, colnames, y, m):
     return df
 
 def main():
-    y = 1929
+    y = 2017
     col_names = [
-        "yyyy/mm/dd",
+        "date",
         "g",
         "f",
         "R"
     ]
     sunspots_df = pd.DataFrame()
-    for i in range(2024-1929):
+    for i in range(2024-y):
         url = "https://solarwww.mtk.nao.ac.jp/mitaka_solar/sunspots/number/mtkdaily{}.txt".format(y+i)
         res = req.urlopen(url)
         body = str(BeautifulSoup(res, "html.parser"))
@@ -64,9 +65,13 @@ def main():
             lines = block.splitlines()[7:-3]
             parsed_lines = parse_lines(lines)
             sunspots_df = append_df(sunspots_df, parsed_lines, col_names, y+i, m+1)
+        
+        time.sleep(0.1)
 
+    sunspots_df = sunspots_df.set_index("date")
     print(sunspots_df)
-    sunspots_df.to_csv("sunspots_1929_2023.csv")
+    
+    sunspots_df.to_csv("sunspots_{}_2023.csv".format(y))
 
 if __name__ == "__main__":
     main()
